@@ -1,0 +1,166 @@
+
+Query = 'issuetype in ("Competence Area") AND "Competence Area" = "5GRAN I&V"  AND ("Planned System Release" = 5G19B_MP OR "Planned System Release" = 5G20B_MP OR  "Planned System Release"  = 5G21A OR  "Planned System Release" = 5G19B OR  "Planned System Release" = 5G20A OR  "Planned System Release" = 5G20B ) AND  (cf[29790] = 2851 OR cf[29790] = 2843 OR cf[29790] = 2840 OR cf[29790] = 2850 OR cf[29790] = 2849 OR cf[29790] = 2853 )'
+
+#without extension
+Filename = 'JIRA_ALL_ITEMS'
+Destination = r'C:\Users\Project\{}'.format(Filename)
+
+ID = ""
+PW = ""
+
+from jira.client import JIRA
+from pandas import DataFrame
+
+'the link may change
+options = {'server': 'https://jiradc.ext.net.XXX.com'}
+jira = JIRA(options, basic_auth=(ID, PW))
+
+IsFilter = "0" #Is not a filter
+block_size = 1000
+block_num = 0
+allissues = []
+
+while True:
+    start_idx = block_num * block_size
+    
+    if IsFilter == '1':
+        issues = jira.search_issues('filter=' + str(Query), start_idx, block_size)
+    else: #is not a filter => Search by JQL
+        issues = jira.search_issues(str(Query), start_idx, block_size)
+        
+    if len(issues) == 0:
+        break
+    block_num += 1
+    
+    for issue in issues:
+        allissues.append(issue)
+        
+issues = DataFrame()
+#MaxIssues = len(allissues)
+
+#Big loop . Should be optimized.
+
+for issue in allissues:
+    
+    d = {}
+    
+    try:
+        d.update({'key':str(issue.key).strip()})
+    except AttributeError:
+        d.update({'key':""})
+
+    try:
+        d.update({'Description.':issue.fields.customfield_10830})
+    except AttributeError:
+        d.update({'Description.':""})
+            
+    try:
+        d.update({'Feature Description1':issue.fields.customfield_29891})
+    except AttributeError:
+        d.update({'Feature Description1':""})
+
+    try:
+        
+        content=""
+        content2 = ""
+        content = str(issue.fields.customfield_123456) #.replace("<JIRA CustomFieldOption: value='","")
+       
+        
+#                print("content initial :" , content)
+        while content2 != content :
+            content2 = content
+            content = content.replace("<JIRA CustomFieldOption: value='","")
+            content = content.replace("<JIRA CustomFieldOption: value='","")
+            content = content.replace(content[content.find("'"):content.find(">")+1],"")
+            content = content.replace("[","")
+            content = content.replace("]","")
+            
+        
+#                print("content modified :" , content)
+        d.update({'PlannedSystemRelease':content})
+        
+    except AttributeError:
+        d.update({'PlannedSystemRelease':""})
+#
+#    #Text2
+#    try:
+#        line =""
+#        line = str(issue.fields.customfield_38727).strip().replace("\n","")
+#        line = line.replace("\r",". ")
+#        line = line.replace("\t","")
+#        d.update({'Text2':line})
+#    except AttributeError:
+#        d.update({'Text2':""})
+        
+        
+    try:
+#        line =""
+#        line = str(issue.fields.customfield_38727).strip().replace("\n","")
+#        line = line.replace("\r",". ")
+#        line = line.replace("\t","")
+        d.update({'Text2':issue.fields.customfield_38727})
+    except AttributeError:
+        d.update({'Text2':""})
+        
+        
+
+
+    try:
+        d.update({'EntityTestEndFB':issue.fields.customfield_38745})
+    except AttributeError:
+        d.update({'EntityTestEndFB':""})
+
+    try:
+        d.update({'SWStartFB':issue.fields.customfield_38746})
+    except AttributeError:
+        d.update({'SWStartFB':""})
+
+    try:
+        d.update({'SWEndFB':issue.fields.customfield_38747})
+    except AttributeError:
+        d.update({'SWEndFB':""})
+
+    try:
+        d.update({'HWStartFB':issue.fields.customfield_38748})
+    except AttributeError:
+        d.update({'HWStartFB':""})
+
+    try:
+        d.update({'HWEndFB':issue.fields.customfield_38749})
+    except AttributeError:
+        d.update({'HWEndFB':""})
+
+    try:
+        d.update({'TargetFB':issue.fields.customfield_38751})
+    except AttributeError:
+        d.update({'TargetFB':""})
+
+    try:
+        d.update({'SpecificationType':issue.fields.customfield_38753})
+    except AttributeError:
+        d.update({'SpecificationType':""})
+
+    try:
+        d.update({'RiskStatus':issue.fields.customfield_38754})
+    except AttributeError:
+        d.update({'RiskStatus':""})
+
+    try:
+        d.update({'SWBuild':issue.fields.customfield_38756})
+    except AttributeError:
+        d.update({'SWBuild':""})
+
+    try:
+        d.update({'RemainingEstimate':issue.fields.timeestimate})
+    except AttributeError:
+        d.update({'RemainingEstimate':""})
+
+    #append each item d with all its information to issue list
+    issues = issues.append(d, ignore_index=True)
+
+'transform to excel file
+issues.to_excel(Destination+".xlsx", index=False)
+
+
+#end = time.time()
+#print(round(end - start,2) , "seconds, i.e" , round((end -start)/60,2), " minutes.")
