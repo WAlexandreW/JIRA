@@ -1,20 +1,22 @@
+#the query may have OR, AND conditions
+Query = 'issuetype in ("Competence Area") AND "Competence Area" = "name"  AND ("Planned System Release" = XXXXX OR "Planned System Release" = XXXX2) AND  (cf[29790] = 123 OR cf[29790] = 2843 OR cf[29790] = 654 OR cf[29790] = 2850 OR cf[29790] = 945 OR cf[29790] = 154 )'
 
-Query = 'issuetype in ("Competence Area") AND "Competence Area" = "5GRAN I&V"  AND ("Planned System Release" = 5G19B_MP OR "Planned System Release" = 5G20B_MP OR  "Planned System Release"  = 5G21A OR  "Planned System Release" = 5G19B OR  "Planned System Release" = 5G20A OR  "Planned System Release" = 5G20B ) AND  (cf[29790] = 2851 OR cf[29790] = 2843 OR cf[29790] = 2840 OR cf[29790] = 2850 OR cf[29790] = 2849 OR cf[29790] = 2853 )'
-
-#without extension
+#without extension, to save the file later
 Filename = 'JIRA_ALL_ITEMS'
 Destination = r'C:\Users\Project\{}'.format(Filename)
 
+#your IDs
 ID = ""
 PW = ""
 
 from jira.client import JIRA
 from pandas import DataFrame
 
-'the link may change
+#the link may change
 options = {'server': 'https://jiradc.ext.net.XXX.com'}
 jira = JIRA(options, basic_auth=(ID, PW))
 
+#its the blocks per the JIRA documentation
 IsFilter = "0" #Is not a filter
 block_size = 1000
 block_num = 0
@@ -38,8 +40,7 @@ while True:
 issues = DataFrame()
 #MaxIssues = len(allissues)
 
-#Big loop . Should be optimized.
-
+#Big loop . May be optimized.
 for issue in allissues:
     
     d = {}
@@ -77,10 +78,10 @@ for issue in allissues:
             
         
 #                print("content modified :" , content)
-        d.update({'PlannedSystemRelease':content})
+        d.update({'PlannedRelease':content})
         
     except AttributeError:
-        d.update({'PlannedSystemRelease':""})
+        d.update({'PlannedRelease':""})
 #
 #    #Text2
 #    try:
@@ -102,53 +103,26 @@ for issue in allissues:
     except AttributeError:
         d.update({'Text2':""})
         
-        
-
-
+ 
     try:
-        d.update({'EntityTestEndFB':issue.fields.customfield_38745})
-    except AttributeError:
-        d.update({'EntityTestEndFB':""})
-
-    try:
-        d.update({'SWStartFB':issue.fields.customfield_38746})
-    except AttributeError:
-        d.update({'SWStartFB':""})
-
-    try:
-        d.update({'SWEndFB':issue.fields.customfield_38747})
-    except AttributeError:
-        d.update({'SWEndFB':""})
-
-    try:
-        d.update({'HWStartFB':issue.fields.customfield_38748})
-    except AttributeError:
-        d.update({'HWStartFB':""})
-
-    try:
-        d.update({'HWEndFB':issue.fields.customfield_38749})
-    except AttributeError:
-        d.update({'HWEndFB':""})
-
-    try:
-        d.update({'TargetFB':issue.fields.customfield_38751})
+        d.update({'TargetFB':issue.fields.customfield_11111})
     except AttributeError:
         d.update({'TargetFB':""})
 
     try:
-        d.update({'SpecificationType':issue.fields.customfield_38753})
+        d.update({'SpecificationType':issue.fields.customfield_22222})
     except AttributeError:
         d.update({'SpecificationType':""})
 
     try:
-        d.update({'RiskStatus':issue.fields.customfield_38754})
+        d.update({'RiskStatus':issue.fields.customfield_33333})
     except AttributeError:
         d.update({'RiskStatus':""})
 
     try:
-        d.update({'SWBuild':issue.fields.customfield_38756})
+        d.update({'Build':issue.fields.customfield_44444})
     except AttributeError:
-        d.update({'SWBuild':""})
+        d.update({'Build':""})
 
     try:
         d.update({'RemainingEstimate':issue.fields.timeestimate})
